@@ -9,21 +9,11 @@ interface InputBaseProps extends InputHTMLAttributes<HTMLInputElement> {
   labelClassName?: string;
 };
 
-export default function Input({ label, labelClassName, ...rest }: InputBaseProps) {
+export default function Input({ label, labelClassName, ...htmlAtt }: InputBaseProps) {
   return (
     <>
-      <label
-        className={`
-          ${poppinsFont.className}
-          flex
-          flex-col
-          justify-evenly
-          h-16
-          ${labelClassName}
-      `}>
-        {label || label}
-        <input {...rest}/>
-      </label>
+      {label && <label htmlFor={htmlAtt.id} className={`${poppinsFont.className} ${labelClassName}`}>{label}</label>}
+      <input {...htmlAtt}/>
     </>
   )
 }

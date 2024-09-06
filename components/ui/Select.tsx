@@ -10,23 +10,13 @@ interface SelectBaseProps extends SelectHTMLAttributes<HTMLSelectElement> {
   options: Array<{ value: string, label: string }>;
 }
 
-export default function Select({ label, labelClassName, options, ...rest }: SelectBaseProps) {
+export default function Select({ label, labelClassName, options, ...htmlAtt }: SelectBaseProps) {
   return (
     <>
-      <label 
-        className={`
-          ${poppinsFont.className}
-          flex
-          flex-col
-          justify-evenly
-          h-16
-          ${labelClassName}
-      `}>
-        {label || label}
-        <select {...rest}>
-          {options.map(option => <option value={option.value}>{option.label}</option>)}
-        </select>
-      </label>
+      {label && <label htmlFor={htmlAtt.id} className={`${poppinsFont.className} ${labelClassName}`}>{label}</label>}
+      <select {...htmlAtt}>
+        {options.map((option, i) => <option key={i} value={option.value}>{option.label}</option>)}
+      </select>
     </>
   )
 }

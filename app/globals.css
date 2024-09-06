@@ -21,6 +21,9 @@ body {
 
 @layer components {
   .btn-primary {
-    @apply flex items-center justify-center py-2 px-3 md:px-4 bg-black text-white rounded-full;
+    @apply flex items-center justify-center py-2 px-3 md:px-4 hover:shadow bg-black text-white rounded-full;
+  }
+  .btn-outline {
+    @apply flex items-center justify-center py-2 px-3 md:px-4 hover:shadow text-black rounded-full border border-black/50;
   }
 }

@@ -9,7 +9,7 @@ const poppinsFont = Poppins({ subsets: ["latin"], weight: '400' });
 
 import Input from "@/components/ui/Input";
 
-export default function SignIn() {
+export default function SignUp() {
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -35,7 +35,7 @@ export default function SignIn() {
         overflow-y-auto
     ">
       <section
-        aria-description="Sign In"
+        aria-description="Sign Up"
         className="
           flex
           flex-wrap
@@ -49,12 +49,13 @@ export default function SignIn() {
           2xl:max-w-7xl
       ">
           <form method="post" onSubmit={handleSubmit} className="flex flex-col items-center justify-start w-80">
-            <h1 className={`${merriweatherFontBold.className} text-xl md:text-2xl my-8`}>Sign In</h1>
+            <h1 className={`${merriweatherFontBold.className} text-xl md:text-2xl my-8`}>Sign Up</h1>
+            <Input type="text" name="name" placeholder="Full name" className="rounded-md border py-2 px-2 mt-3 mb-2 w-full" />
             <Input type="email" name="email" placeholder="Email address" className="rounded-md border py-2 px-2 mt-3 mb-2 w-full" />
             <Input type="password" name="password" placeholder="Password" className="rounded-md border py-2 px-2 mb-3 mt-2 w-full" />
-            <button type="submit" className={`${poppinsFontSemibold.className} btn-primary w-full text-xs md:text-lg`}>Sign In</button>
+            <button type="submit" className={`${poppinsFontSemibold.className} btn-primary w-full text-xs md:text-lg`}>Sign Up</button>
             <p className={`${poppinsFont.className} my-8 text-stone-700`}>
-              Need an account? <Link href="/signup" className="underline">Sign up</Link>
+              Already have an account? <Link href="/signin" className="underline">Sign in</Link>
             </p>
             <Link href="/" className={`${poppinsFontSemibold.className} underline`}>Go back to homepage</Link>
           </form>

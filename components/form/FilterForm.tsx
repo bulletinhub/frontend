@@ -62,45 +62,13 @@ export default function FilterForm() {
               mb-1
 
               hover:cursor-pointer
-              hover:bg-white
               shadow
               border
               border-black
           ">
-            <div className={`flex items-center w-4/5 text-ellipsis whitespace-nowrap overflow-hidden ${poppinsFont.className}`}>
+            <div className={`flex items-center w-11/12 text-ellipsis whitespace-nowrap overflow-hidden ${poppinsFont.className}`}>
               <FontAwesomeIcon icon={faShare} className="pl-2 pr-1" />
               <span>My Saved Filter 1</span>
-            </div>
-            <div className="flex justify-evenly w-1/5">
-              <FontAwesomeIcon icon={faPen} />
-              <FontAwesomeIcon icon={faTrash} />
-              {/* <FontAwesomeIcon icon={faFloppyDisk} /> */}
-            </div>
-          </div>
-          <div 
-            className="
-              flex
-              items-center
-              justify-between
-              h-9
-              w-full
-              rounded-md
-              mb-1
-
-              hover:cursor-pointer
-              hover:bg-white
-              shadow
-              border
-              border-black
-          ">
-            <div className={`flex items-center w-4/5 text-ellipsis whitespace-nowrap overflow-hidden ${poppinsFont.className}`}>
-              <FontAwesomeIcon icon={faShare} className="pl-2 pr-1" />
-              <span>My Saved Filter 2</span>
-            </div>
-            <div className="flex justify-evenly w-1/5">
-              <FontAwesomeIcon icon={faPen} />
-              <FontAwesomeIcon icon={faTrash} />
-              {/* <FontAwesomeIcon icon={faFloppyDisk} /> */}
             </div>
           </div>
         </div>
@@ -109,12 +77,14 @@ export default function FilterForm() {
         <div className="flex items-center h-12">
           <h1 className={`${poppinsFontBold.className} text-lg`}>Filter News:</h1>
         </div>
-        <Input labelClassName="w-full" className="rounded-md border py-1 px-2" label="Search by keyword:" type="search" name="keyword" defaultValue="" placeholder="Keyword..." />
-        <Input labelClassName="w-full" className="rounded-md border py-1 px-2" label="Date:" type="date" name="date" />
+        <Input labelClassName="w-full h-8 flex items-center" className="rounded-md border py-1 px-2 h-9" id="keyword" label="Search by keyword:" type="search" name="keyword" defaultValue="" placeholder="Keyword..." />
+        <Input labelClassName="w-full h-8 flex items-center" className="rounded-md border py-1 px-2 h-9" id="date" label="Date:" type="date" name="date" />
         <Select
+          id="category"
           label="Category:" 
           name="category"
-          className="rounded-md border py-1 px-2 bg-white"
+          labelClassName="w-full h-8 flex items-center"
+          className="rounded-md border py-1 px-2 bg-white h-9"
           options={[
             { value: "empty", label: 'All' },
             { value: "valor1", label: 'Valor 1' },
@@ -123,9 +93,11 @@ export default function FilterForm() {
           ]}
         />
         <Select
+          id="source"
           label="Source:" 
           name="source"
-          className="rounded-md border py-1 px-2 bg-white"
+          labelClassName="w-full h-8 flex items-center"
+          className="rounded-md border py-1 px-2 bg-white h-9"
           options={[
             { value: "empty", label: 'All' },
             { value: "valor1", label: 'Valor 1' },
@@ -134,9 +106,11 @@ export default function FilterForm() {
           ]}
         />
         <Select
+          id="author"
           label="Author:" 
           name="author"
-          className="rounded-md border py-1 px-2 bg-white"
+          labelClassName="w-full h-8 flex items-center"
+          className="rounded-md border py-1 px-2 bg-white h-9"
           options={[
             { value: "empty", label: 'All' },
             { value: "valor1", label: 'Valor 1' },
@@ -147,7 +121,7 @@ export default function FilterForm() {
         <div className="flex justify-between items-center h-16 w-full">
           <button type="reset" className={`${poppinsFontSemibold.className}`}>Clear filter</button>
           <div className="actions">
-            <button type="submit" className={`${poppinsFontSemibold.className} btn-primary text-xs md:text-lg`}>Filter</button>
+            <button type="submit" className={`${poppinsFontSemibold.className} btn-primary px-4 text-lg`}>Filter</button>
           </div>
         </div>
       </form>

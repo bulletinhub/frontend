@@ -3,8 +3,11 @@ import { useRef, useState } from "react";
 
 import Article from "@/components/ui/Article";
 
-// import { Poppins } from "next/font/google";
-// const poppinsFont = Poppins({ subsets: ["latin"], weight: '400' });
+import { Merriweather, Poppins } from "next/font/google";
+const merriweatherFontBold = Merriweather({ subsets: ["latin"], weight: '700' });
+const poppinsFont = Poppins({ subsets: ["latin"], weight: '400' });
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 
 export default function Home() {
   
@@ -33,6 +36,41 @@ export default function Home() {
           xl:max-w-5xl
           2xl:max-w-7xl
       ">
+        <div className="flex flex-wrap justify-center items-center w-full min-h-40 mb-3">
+          <div className="flex items-center justify-center w-full">
+            <h1 className={`${merriweatherFontBold.className} text-xl md:text-2xl`}>Filtered News:</h1>
+          </div>
+          <div className="flex items-center justify-center p-1 w-auto rounded-full border border-black m-1">
+            <span className={`${poppinsFont.className} pr-1 pl-2`}>Sarah Blaskey</span>
+            <button type="button" title="Remove filter">
+              <FontAwesomeIcon icon={faCircleXmark} className="pr-2" />
+            </button>
+          </div>
+          <div className="flex items-center justify-center p-1 w-auto rounded-full border border-black m-1">
+            <span className={`${poppinsFont.className} pr-1 pl-2`}>Sports</span>
+            <button type="button" title="Remove filter">
+              <FontAwesomeIcon icon={faCircleXmark} className="pr-2" />
+            </button>
+          </div>
+          <div className="flex items-center justify-center p-1 w-auto rounded-full border border-black m-1">
+            <span className={`${poppinsFont.className} pr-1 pl-2`}>15/09/2024</span>
+            <button type="button" title="Remove filter">
+              <FontAwesomeIcon icon={faCircleXmark} className="pr-2" />
+            </button>
+          </div>
+          <div className="flex items-center justify-center p-1 w-auto rounded-full border border-black m-1">
+            <span className={`${poppinsFont.className} pr-1 pl-2`}>The New York Times</span>
+            <button type="button" title="Remove filter">
+              <FontAwesomeIcon icon={faCircleXmark} className="pr-2" />
+            </button>
+          </div>
+          <div className="flex items-center justify-center p-1 w-auto rounded-full border border-black m-1">
+            <span className={`${poppinsFont.className} pr-1 pl-2`}>barack obama</span>
+            <button type="button" title="Remove filter">
+              <FontAwesomeIcon icon={faCircleXmark} className="pr-2" />
+            </button>
+          </div>
+        </div>
         <Article/>
         <Article/>
         <Article/>

@@ -71,7 +71,7 @@ export const Drawer = forwardRef<DrawerRefProps, DrawerProps>(
             justify-center
             rounded-full
             size-10
-            hover:bg-slate-300
+            hover:bg-stone-300/50
             ${position === 'left' ? 'self-end' : 'self-start'}
         `}>
           {position === 'left' ? 
