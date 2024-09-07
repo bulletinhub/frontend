@@ -6,12 +6,19 @@ const poppinsFont = Poppins({ subsets: ["latin"], weight: '400' });
 const poppinsFontSemibold = Poppins({ subsets: ["latin"], weight: '600' });
 const poppinsFontBold = Poppins({ subsets: ["latin"], weight: '700' });
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBookmark, faPen, faTrash, faFloppyDisk, faShare } from '@fortawesome/free-solid-svg-icons';
+import { faShare } from '@fortawesome/free-solid-svg-icons';
+import { faBookmark } from '@fortawesome/free-regular-svg-icons';
 
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 
+import { useAppSelector, useAppDispatch, useAppStore } from '@/lib/hooks'
+import { setSavedFilter, setAppliedFilter, updateCurrentFilter, resetCurrentFilter } from '@/lib/features/filters/filtersSlice'
+
 export default function FilterForm() {
+  const store = useAppStore()
+  const dispatch = useAppDispatch()
+
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -20,9 +27,9 @@ export default function FilterForm() {
 
     // fetch('/some-api', { method: form.method, body: formData });
 
-    // Or you can work with it as a plain object:
     const formJson = Object.fromEntries(formData.entries());
     console.log(formJson);
+    // dispatch(setAppliedFilter(formJson))
   }
 
   return (
@@ -77,16 +84,35 @@ export default function FilterForm() {
         <div className="flex items-center h-12">
           <h1 className={`${poppinsFontBold.className} text-lg`}>Filter News:</h1>
         </div>
-        <Input labelClassName="w-full h-8 flex items-center" className="rounded-md border py-1 px-2 h-9" id="keyword" label="Search by keyword:" type="search" name="keyword" defaultValue="" placeholder="Keyword..." />
-        <Input labelClassName="w-full h-8 flex items-center" className="rounded-md border py-1 px-2 h-9" id="date" label="Date:" type="date" name="date" />
+        <Input 
+          type="search"
+          id="keyword"
+          name="keyword"
+          label="Search by keyword:"
+          placeholder="Keyword..."
+          defaultValue=""
+          labelClassName="w-full h-8 flex items-center"
+          className="rounded-md border py-1 px-2 h-9"
+          onChange={e => dispatch(updateCurrentFilter({ key: 'keyword', value: e.target.value }))}
+        />
+        <Input 
+          type="date"
+          id="date"
+          name="date"
+          label="Date:"
+          labelClassName="w-full h-8 flex items-center"
+          className="rounded-md border py-1 px-2 h-9"
+          onChange={e => dispatch(updateCurrentFilter({ key: 'date', value: e.target.value }))}
+        />
         <Select
           id="category"
           label="Category:" 
           name="category"
           labelClassName="w-full h-8 flex items-center"
           className="rounded-md border py-1 px-2 bg-white h-9"
+          onChange={e => dispatch(updateCurrentFilter({ key: 'category', value: e.target.value }))}
           options={[
-            { value: "empty", label: 'All' },
+            { value: "all", label: 'All' },
             { value: "valor1", label: 'Valor 1' },
             { value: "valor2", label: 'Valor 2' },
             { value: "valor3", label: 'Valor 3' },
@@ -98,8 +124,9 @@ export default function FilterForm() {
           name="source"
           labelClassName="w-full h-8 flex items-center"
           className="rounded-md border py-1 px-2 bg-white h-9"
+          onChange={e => dispatch(updateCurrentFilter({ key: 'source', value: e.target.value }))}
           options={[
-            { value: "empty", label: 'All' },
+            { value: "all", label: 'All' },
             { value: "valor1", label: 'Valor 1' },
             { value: "valor2", label: 'Valor 2' },
             { value: "valor3", label: 'Valor 3' },
@@ -111,15 +138,28 @@ export default function FilterForm() {
           name="author"
           labelClassName="w-full h-8 flex items-center"
           className="rounded-md border py-1 px-2 bg-white h-9"
+          onChange={e => dispatch(updateCurrentFilter({ key: 'author', value: e.target.value }))}
           options={[
-            { value: "empty", label: 'All' },
+            { value: "all", label: 'All' },
             { value: "valor1", label: 'Valor 1' },
             { value: "valor2", label: 'Valor 2' },
             { value: "valor3", label: 'Valor 3' },
           ]}
         />
+        <div className="flex justify-center items-center h-16 w-full">
+          <button className="flex justify-center items-center w-full">
+            <FontAwesomeIcon icon={faBookmark} className="pr-1.5" />
+            <span className={`${poppinsFontSemibold.className}`}>Save this filter</span>
+          </button>
+        </div>
         <div className="flex justify-between items-center h-16 w-full">
-          <button type="reset" className={`${poppinsFontSemibold.className}`}>Clear filter</button>
+          <button 
+            type="reset"
+            className={`${poppinsFontSemibold.className} btn-outline px-4 text-lg`}
+            onClick={() => dispatch(resetCurrentFilter())}
+          >
+            Clear filter
+          </button>
           <div className="actions">
             <button type="submit" className={`${poppinsFontSemibold.className} btn-primary px-4 text-lg`}>Filter</button>
           </div>

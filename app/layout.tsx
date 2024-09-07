@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import StoreProvider from '@/app/StoreProvider'
 
 import Header from "@/components/ui/Header";
 
@@ -12,10 +13,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children, }: Readonly<{ children: React.ReactNode; }>) {
   return (
     <html lang="en">
-      <body className="bg-stone-100 relative w-screen">
-        <Header/>
-        {children}
-      </body>
+      <StoreProvider>
+        <body className="bg-stone-100 relative w-screen">
+          <Header/>
+          {children}
+        </body>
+      </StoreProvider>
     </html>
   );
 }
