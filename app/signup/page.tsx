@@ -7,7 +7,7 @@ const merriweatherFontBold = Merriweather({ subsets: ["latin"], weight: '700' })
 const poppinsFontSemibold = Poppins({ subsets: ["latin"], weight: '600' });
 const poppinsFont = Poppins({ subsets: ["latin"], weight: '400' });
 
-import Input from "@/components/ui/Input";
+import Input from "@/components/input/Input";
 
 export default function SignUp() {
   function handleSubmit(e: FormEvent<HTMLFormElement>) {

@@ -1,20 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 
-type BaseFilter = {
-  keyword: string;
-  date: string;
-  source: string;
-  author: string;
-  category: string;
-}
-
-type SavedFilter = {
-  filterName: string;
-  filter: BaseFilter;
-}
-
 export interface FiltersState {
+  emptyFilter: BaseFilter;
   currentFilter: BaseFilter;
   appliedFilter: BaseFilter;
   savedFilters: Array<SavedFilter>;
@@ -29,6 +17,7 @@ const emptyFilter: BaseFilter = {
 }
 
 const initialState: FiltersState = {
+  emptyFilter,
   currentFilter: emptyFilter,
   appliedFilter: emptyFilter,
   savedFilters: []

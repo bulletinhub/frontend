@@ -51,8 +51,8 @@ export default function Article() {
         <Image
           src="/thumbnail.jpg"
           fill={true}
-          objectFit="cover"
           alt="Article image"
+          className="object-cover"
         />
       </div>
       <div 

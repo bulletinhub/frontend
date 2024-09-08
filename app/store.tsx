@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit'
 
-import filtersReducer from '@/lib/features/filters/filtersSlice'
+import filtersReducer from '@/components/filter/filtersSlice'
+import drawersReducer from '@/components/drawer/drawersSlice'
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
-      filters: filtersReducer
+      filters: filtersReducer,
+      drawers: drawersReducer
     }
   })
 }

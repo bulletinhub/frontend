@@ -1,5 +1,4 @@
-"use client"
-import { useState, InputHTMLAttributes } from "react";
+import { InputHTMLAttributes } from "react";
 
 import { Poppins } from "next/font/google";
 const poppinsFont = Poppins({ subsets: ["latin"], weight: '400' });

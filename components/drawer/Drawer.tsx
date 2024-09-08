@@ -4,6 +4,9 @@ import { useState, ReactNode, forwardRef, useImperativeHandle } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
+import { useAppDispatch, useAppSelector } from '@/app/hooks'
+import { openLeftDrawer, closeLeftDrawer, openRightDrawer, closeRightDrawer } from './drawersSlice'
+
 export type DrawerRefProps = {
   closeDrawer: () => void
   openDrawer: () => void
@@ -18,22 +21,24 @@ interface DrawerProps {
 
 export const Drawer = forwardRef<DrawerRefProps, DrawerProps>(
   function DrawerComponent({ children, position }, ref) {
-    const [isOpened, setIsOpened] = useState(false);
+    const dispatch = useAppDispatch()
+    const isLeftDrawerOpened = useAppSelector((state) => state.drawers.isLeftDrawerOpened)
+    const isRightDrawerOpened = useAppSelector((state) => state.drawers.isRightDrawerOpened)
 
     function closeDrawer() {
-      setIsOpened(false);
+      position === 'left' ? dispatch(closeLeftDrawer()) : dispatch(closeRightDrawer())
     }
 
     function openDrawer() {
-      setIsOpened(true);
+      position === 'left' ? dispatch(openLeftDrawer()) : dispatch(openRightDrawer())
     }
 
     function definePosition() {
       switch (position) {
         case 'left':
-          return isOpened ? 'left-0 absolute' : '-left-80 absolute'
+          return isLeftDrawerOpened ? 'left-0 absolute' : '-left-80 absolute'
         case 'right':
-          return isOpened ? 'right-0 fixed' : '-right-80 fixed'
+          return isRightDrawerOpened ? 'right-0 fixed' : '-right-80 fixed'
       }
     }
 
@@ -64,7 +69,7 @@ export const Drawer = forwardRef<DrawerRefProps, DrawerProps>(
       `}>
         <button
           aria-label="Close drawer"
-          onClick={() => setIsOpened(!isOpened)}
+          onClick={() => closeDrawer()}
           className={`
             flex
             items-center

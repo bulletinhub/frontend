@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import StoreProvider from '@/app/StoreProvider'
 
-import Header from "@/components/ui/Header";
+import Header from "@/components/header/Header";
 
 import "./globals.css";
 
