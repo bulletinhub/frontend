@@ -1,6 +1,7 @@
 "use client"
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 
+import { useRouter } from 'next/navigation'
 import Link from 'next/link';
 import { Merriweather, Poppins } from "next/font/google";
 const merriweatherFontBold = Merriweather({ subsets: ["latin"], weight: '700' });
@@ -13,13 +14,24 @@ import { faBookmark } from '@fortawesome/free-solid-svg-icons';
 import { EditUserModal, EditUserModalRefProps } from "@/components/modal/EditUserModal";
 import { EditFilterModal, EditFilterModalRefProps } from "@/components/modal/EditFilterModal";
 import { DeleteAccountModal, DeleteAccountModalRefProps } from "@/components/modal/DeleteAccountModal";
+import { eraseCookie, getCookie } from '@/utils/cookies'
 
 type ModalTypes = 'editUser' | 'editFilter' | 'delAccount' | null
 
 export default function MyAccount() {
+  const router = useRouter()
   const editUserModalRef = useRef<EditUserModalRefProps>(null)
   const editFilterModalRef = useRef<EditFilterModalRefProps>(null)
   const deleteAccountModalRef = useRef<DeleteAccountModalRefProps>(null)
+
+  const [userData, setUserData] = useState(null)
+  const [isUserLoading, setUserLoading] = useState(true)
+
+  function handleSignOut() {
+    eraseCookie('access_token')
+    eraseCookie('user_id')
+    router.push('/')
+  }
 
   function openModal(modalType: ModalTypes) {
     switch (modalType) {
@@ -36,6 +48,25 @@ export default function MyAccount() {
         break
     }
   }
+
+  useEffect(() => {
+    const accessToken = getCookie('access_token')
+    const userId = getCookie('user_id')
+
+    fetch(`${process.env.NEXT_PUBLIC_BULLETINHUB_API}/api/user/${userId}`, {
+      method: 'get',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/json'
+      }
+    })
+      .then((res) => res.json())
+      .then(({ data }) => {
+        setUserData(data)
+        setUserLoading(false)
+      })
+      .catch((error) => console.error(error))
+  }, [])
 
   return (
     <main className="flex justify-center z-0 absolute w-full h-[calc(100vh-4rem)] overflow-y-auto">
@@ -56,9 +87,9 @@ export default function MyAccount() {
             </div>
             <div className="flex flex-col w-1/2 text-sm md:text-base">
               <h1 className={`${poppinsFontItalic.className} pl-4 pt-4`}>NAME</h1>
-              <p className={`${poppinsFont.className} pl-4`}>Heitor Stael</p>
+              <p className={`${poppinsFont.className} pl-4`}>{!isUserLoading ? userData?.name : 'Loading name...'}</p>
               <h1 className={`${poppinsFontItalic.className} pl-4 pt-4`}>EMAIL</h1>
-              <p className={`${poppinsFont.className} pl-4`}>heitor@email.com</p>
+              <p className={`${poppinsFont.className} pl-4`}>{!isUserLoading ? userData?.email : 'Loading email...'}</p>
               <h1 className={`${poppinsFontItalic.className} pl-4 pt-4`}>PASSWORD</h1>
               <p className={`${poppinsFont.className} pl-4 pb-4`}>***********</p>
               <button 
@@ -91,13 +122,13 @@ export default function MyAccount() {
               <span className={`${poppinsFont.className} text-base`}>My Saved Filter 1</span>
             </div>
           </div>
-          <button aria-label="Sign Out" className="btn-red my-8">
+          <button aria-label="Sign Out" className="btn-red my-8" onClick={() => handleSignOut()}>
             <span className={`${poppinsFontSemibold.className} text-lg`}>Sign Out</span>
           </button>
           <Link href="/" className={`${poppinsFontSemibold.className} underline mb-8`}>Go back to homepage</Link>
         </div>
       </section>
-      <EditUserModal ref={editUserModalRef} />
+      <EditUserModal userData={userData} ref={editUserModalRef} />
       <EditFilterModal ref={editFilterModalRef} />
       <DeleteAccountModal ref={deleteAccountModalRef} />
     </main>

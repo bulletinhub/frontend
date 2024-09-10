@@ -49,8 +49,8 @@ export default function Article() {
       </div>
       <div className="flex relative h-[40%] w-[calc(100%-1rem)] self-center">
         <Image
-          src="/thumbnail.jpg"
-          fill={true}
+          src="/articleFallback.jpeg"
+          fill
           alt="Article image"
           className="object-cover"
         />

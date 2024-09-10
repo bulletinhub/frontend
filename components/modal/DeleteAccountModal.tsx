@@ -1,11 +1,13 @@
 "use client"
 import { useRef, FormEvent, forwardRef, useImperativeHandle } from "react";
 
+import { useRouter } from 'next/navigation'
 import { Poppins } from "next/font/google";
 const poppinsFontSemibold = Poppins({ subsets: ["latin"], weight: '600' });
 const poppinsFont = Poppins({ subsets: ["latin"], weight: '400' });
 
 import { ModalComponent, ModalComponentRefProps } from "@/components/modal/Modal";
+import { eraseCookie, getCookie } from '@/utils/cookies'
 
 export type DeleteAccountModalRefProps = {
   openModal: () => void
@@ -14,20 +16,32 @@ export type DeleteAccountModalRefProps = {
 
 export const DeleteAccountModal = forwardRef<DeleteAccountModalRefProps>(
   function DeleteAccountModal({}, ref) {
+    const router = useRouter()
     const modalRef = useRef<ModalComponentRefProps>(null)
     
-    function handleSubmit(e: FormEvent<HTMLFormElement>) {
-      e.preventDefault();
-  
-      const form = e.currentTarget;
-      const formData = new FormData(form);
-  
-      // fetch('/some-api', { method: form.method, body: formData });
-  
-      // Or you can work with it as a plain object:
-      const formJson = Object.fromEntries(formData.entries());
-      console.log(formJson);
-      closeModal()
+    async function handleDelete(e: FormEvent<HTMLFormElement>) {
+      e.preventDefault()
+
+      const accessToken = getCookie('access_token')
+      const userId = getCookie('user_id')
+
+      let { status, message } = await fetch(`${process.env.NEXT_PUBLIC_BULLETINHUB_API}/api/user/${userId}`, {
+        method: 'delete',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: 'application/json'
+        }
+      })
+        .then((res) => res.json())
+        .catch((error) => console.error(error))
+      
+      if (status === 'success') {
+        eraseCookie('access_token')
+        eraseCookie('user_id')
+        router.push('/')
+      } else {
+        console.error(message)
+      }
     }
   
     const openModal = () => modalRef.current?.openModal()
@@ -42,7 +56,7 @@ export const DeleteAccountModal = forwardRef<DeleteAccountModalRefProps>(
   
     return (
       <ModalComponent ref={modalRef}>
-        <form className="flex flex-col flex-grow w-full" method="post" onSubmit={handleSubmit}>
+        <form className="flex flex-col flex-grow w-full" method="post" onSubmit={handleDelete}>
           <div className="flex justify-center items-center h-12">
             <h1 className={`${poppinsFontSemibold.className} text-lg`}>Confirmation</h1>
           </div>

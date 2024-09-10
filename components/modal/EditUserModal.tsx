@@ -8,10 +8,18 @@ const poppinsFont = Poppins({ subsets: ["latin"], weight: '400' });
 
 import Input from "@/components/input/Input";
 import { ModalComponent, ModalComponentRefProps } from "@/components/modal/Modal";
+import { getCookie } from '@/utils/cookies'
 
 export type EditUserModalRefProps = {
   openModal: () => void
   closeModal: () => void
+}
+
+interface EditUserModalProps {
+  userData: {
+    name: string;
+    email: string;
+  } | null;
 }
 
 type EmptyFormTypes = {
@@ -28,24 +36,42 @@ const emptyForm: EmptyFormTypes = {
   oldPassword: ''
 }
 
-export const EditUserModal = forwardRef<EditUserModalRefProps>(
-  function EditUserModal({}, ref) {
+export const EditUserModal = forwardRef<EditUserModalRefProps, EditUserModalProps>(
+  function EditUserModal({ userData }, ref) {
     const modalRef = useRef<ModalComponentRefProps>(null)
     const [currentForm, setCurrentForm] = useState<EmptyFormTypes>(emptyForm)
     const [isFormEmpty, setIsFormEmpty] = useState(true)
     
-    function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    async function handleEditUser(e: FormEvent<HTMLFormElement>) {
       e.preventDefault();
   
-      const form = e.currentTarget;
-      const formData = new FormData(form);
-  
-      // fetch('/some-api', { method: form.method, body: formData });
-  
-      // Or you can work with it as a plain object:
-      const formJson = Object.fromEntries(formData.entries());
-      console.log(formJson);
-      closeModal()
+      const form = e.currentTarget
+      const formData = new FormData(form)
+      const nameInput = formData.get('fullName')
+      formData.append('name', nameInput as string)
+      formData.append('current_name', userData.name)
+      formData.append('current_email', userData.email)
+
+      const accessToken = getCookie('access_token')
+      const userId = getCookie('user_id')
+      
+      let { status, message } = await fetch(`${process.env.NEXT_PUBLIC_BULLETINHUB_API}/api/user/${userId}`, {
+        method: 'post',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: 'application/json',
+        },
+        body: formData
+      })
+        .then((res) => res.json())
+        .catch((error) => console.error(error))
+      
+      if (status === 'success') {
+        closeModal()
+        window.location.reload()
+      } else {
+        console.error(message)
+      }
     }
 
     function handleFormChange(event: ChangeEvent<HTMLInputElement>) {
@@ -75,7 +101,7 @@ export const EditUserModal = forwardRef<EditUserModalRefProps>(
   
     return (
       <ModalComponent ref={modalRef}>
-        <form className="flex flex-col flex-grow w-full" method="post" onSubmit={handleSubmit}>
+        <form className="flex flex-col flex-grow w-full" method="post" onSubmit={handleEditUser}>
           <div className="flex justify-center items-center h-12">
             <h1 className={`${poppinsFontSemibold.className} text-lg`}>Edit your profile</h1>
           </div>
@@ -87,8 +113,10 @@ export const EditUserModal = forwardRef<EditUserModalRefProps>(
               name="fullName"
               labelClassName="w-full h-8 flex items-center"
               className="rounded-md border py-1 px-2 h-9"
+              placeholder={userData?.name}
               onChange={handleFormChange}
               value={currentForm.fullName}
+              minLength={3}
             />
             <Input
               type="email"
@@ -97,11 +125,12 @@ export const EditUserModal = forwardRef<EditUserModalRefProps>(
               name="email"
               labelClassName="w-full h-8 flex items-center"
               className="rounded-md border py-1 px-2 h-9"
+              placeholder={userData?.email}
               onChange={handleFormChange}
               value={currentForm.email}
             />
             <Input
-              type="oldPassword"
+              type="password"
               label="Old Password:"
               id="oldPassword"
               name="oldPassword"
@@ -120,6 +149,7 @@ export const EditUserModal = forwardRef<EditUserModalRefProps>(
               className="rounded-md border py-1 px-2 h-9"
               onChange={handleFormChange}
               value={currentForm.password}
+              minLength={6}
             />
           </div>
           <div className="flex justify-between w-full mt-8">
