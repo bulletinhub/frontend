@@ -1,5 +1,6 @@
 "use client"
 import { useRef, useEffect, FormEvent, useState, ChangeEvent } from "react";
+import Link from "next/link";
 import { isEqual } from 'radash'
 
 import { Poppins } from "next/font/google";
@@ -12,13 +13,13 @@ import { faBookmark } from '@fortawesome/free-regular-svg-icons';
 
 import Input from "@/components/input/Input";
 import Select from "@/components/select/Select";
+import { getCookie } from '@/utils/cookies'
 
 import { useAppSelector, useAppDispatch, useAppStore } from '@/app/hooks'
 import { setSavedFilter, setAppliedFilter, updateCurrentFilter, resetCurrentFilter } from '@/components/filter/filtersSlice'
 import { closeLeftDrawer } from "@/components/drawer/drawersSlice";
 
 export default function FilterForm() {
-  const store = useAppStore()
   const dispatch = useAppDispatch()
   const emptyFilter = useAppSelector((state) => state.filters.emptyFilter)
   const savedFilters = useAppSelector((state) => state.filters.savedFilters)
@@ -26,6 +27,7 @@ export default function FilterForm() {
   const [currentFilter, setCurrentFilter] = useState(emptyFilter)
   const [isFilterEmpty, setIsFilterEmpty] = useState(true)
   const [isFilterEqualFilterSaved, setIsFilterEqualFilterSaved] = useState(false)
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false)
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -49,14 +51,69 @@ export default function FilterForm() {
     dispatch(closeLeftDrawer())
   }
 
-  function handleSaveFilter() {
-    let newFilter = {
+  async function handleSaveFilter() {
+    await saveCurrentFilterToDatabase()
+    saveCurrentFilterToRedux()
+  }
+
+  function saveCurrentFilterToRedux() {
+    const newFilter = {
       filterName: 'My Saved Filter',
       filter: currentFilter
     }
 
     setIsFilterEqualFilterSaved(true)
     dispatch(setSavedFilter(newFilter))
+  }
+
+  async function saveCurrentFilterToDatabase() {
+    const userId = getCookie('user_id')
+    const accessToken = getCookie('access_token')
+    const newFilter = JSON.stringify({
+      id_users: Number(userId),
+      name: 'My Saved Filter',
+      ...currentFilter
+    })
+
+    let { status, message } = await fetch(`${process.env.NEXT_PUBLIC_BULLETINHUB_API}/api/filter`, {
+        method: 'post',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: 'application/json',
+          'content-type': 'application/json',
+        },
+        body: newFilter
+      })
+      .then((res) => res.json())
+      .catch((error) => console.error(error))
+    
+    if (status === 'error') {
+      console.error(message)
+    }
+  }
+
+  async function getFiltersByUserId(id_users: number) {
+    const accessToken = getCookie('access_token')
+
+    let { data, message } = await fetch(`${process.env.NEXT_PUBLIC_BULLETINHUB_API}/api/filter/user/${id_users}`, {
+      method: 'get',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/json',
+      },
+    })
+    .then((res) => res.json())
+    .catch((error) => console.error(error))
+  
+    if (data) {
+      for (let filter of data) {
+        const filterName = filter.name
+        delete filter.name
+        dispatch(setSavedFilter({ filterName, filter }))
+      }
+    } else {
+      console.error(message)
+    }
   }
 
   function handleFormChange(event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
@@ -74,6 +131,16 @@ export default function FilterForm() {
     setIsFilterEqualFilterSaved(filterAlreadySaved)
   }, [currentFilter])
 
+  useEffect(() => {
+    const userId = getCookie('user_id')
+    const signedIn = !!userId
+    setIsUserLoggedIn(signedIn)
+
+    if (signedIn) {
+      getFiltersByUserId(Number(userId))
+    }
+  }, [])
+
   return (
     <>
       <div className="flex flex-col justify-between h-40 w-full">
@@ -81,18 +148,26 @@ export default function FilterForm() {
           <h1 className={`${poppinsFontBold.className} text-lg`}>Saved Filters</h1>
         </div>
         <div className="flex flex-wrap items-start h-96 w-full rounded-md overflow-y-auto border border-black/50">
-          {savedFilters.map(({ filterName, filter }, i) => 
-            <div 
-              key={i}
-              className="flex items-center justify-between h-9 w-full rounded-md mb-1 hover:cursor-pointer shadow border border-black"
-              onClick={() => setCurrentFilter(filter)}
-            >
-              <div className={`flex items-center w-11/12 text-ellipsis whitespace-nowrap overflow-hidden ${poppinsFont.className}`}>
-                <FontAwesomeIcon icon={faShare} className="pl-2 pr-1" />
-                <span>{filterName}</span>
+          {isUserLoggedIn ?
+            savedFilters.map(({ filterName, filter }, i) => 
+              <div 
+                key={i}
+                className="flex items-center justify-between h-9 w-full rounded-md mb-1 hover:cursor-pointer shadow border border-black"
+                onClick={() => setCurrentFilter(filter)}
+              >
+                <div className={`flex items-center w-11/12 text-ellipsis whitespace-nowrap overflow-hidden ${poppinsFont.className}`}>
+                  <FontAwesomeIcon icon={faShare} className="pl-2 pr-1" />
+                  <span>{filterName}</span>
+                </div>
               </div>
+            )
+          :
+            <div className="flex items-center justify-center h-full w-full">
+              <span className={`${poppinsFont.className} text-xs`}>
+                <Link href="/signin" className="underline">Sign in</Link> to save custom filters for autofill!
+              </span>
             </div>
-          )}
+          }
         </div>
       </div>
       <form className="flex flex-col flex-grow w-full" method="post" onSubmit={handleSubmit}>
@@ -117,6 +192,7 @@ export default function FilterForm() {
           label="Date:"
           labelClassName="w-full h-8 flex items-center"
           className="rounded-md border py-1 px-2 h-9"
+          max={new Date().toISOString().split("T")[0]} // max date today
           onChange={handleFormChange}
           value={currentFilter.date}
         />
@@ -168,7 +244,7 @@ export default function FilterForm() {
         <div className="flex justify-center items-center h-16 w-full">
           <button 
             type="button"
-            className={`flex justify-center items-center w-full ${(isFilterEmpty || isFilterEqualFilterSaved) && 'hidden'}`}
+            className={`flex justify-center items-center w-full ${(isFilterEmpty || isFilterEqualFilterSaved || !isUserLoggedIn) && 'hidden'}`}
             onClick={() => handleSaveFilter()}
           >
             <FontAwesomeIcon icon={faBookmark} className="pr-1.5" />
