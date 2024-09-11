@@ -31,7 +31,7 @@ export const filtersSlice = createSlice({
       state.appliedFilter = action.payload
     },
     setSavedFilter: (state, action: PayloadAction<SavedFilter>) => {
-      const alreadySaved = state.savedFilters.some(filter => filter.filterName === action.payload.filterName)
+      const alreadySaved = state.savedFilters.some(filter => filter.filterId === action.payload.filterId)
       if (!alreadySaved) state.savedFilters.push(action.payload)
     },
     updateCurrentFilter: (state, action: PayloadAction<{ key: string, value: string }>) => {

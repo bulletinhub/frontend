@@ -14,12 +14,29 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { isEqual, isEmpty } from "radash";
 
+type Article = {
+  id: number;
+  title: string;
+  description: string;
+  url_origin: string;
+  author: string | null;
+  url_thumbnail: string | null;
+  language: string;
+  source: string;
+  published: string;
+}
+
 export default function Home() {
   const appliedFilter = useAppSelector((state) => state.filters.appliedFilter)
   const emptyFilter = useAppSelector((state) => state.filters.emptyFilter)
   const dispatch = useAppDispatch()
   const [haveFilters, setHaveFilters] = useState(false)
   const [exhibitionFilters, setExhibitionFilters] = useState(Array<{}>)
+  const [articles, setArticles] = useState<Array<Article>>([])
+  const [categories, setCategories] = useState<Array<string>>([])
+  const [sources, setSources] = useState<Array<string>>([])
+  const [authors, setAuthors] = useState<Array<string>>([])
+  const [filteredArticles, setFilteredArticles] = useState([])
 
   function formatExhibitionFilters() {
     let newExhibitionFilters = Object.entries(appliedFilter)
@@ -45,15 +62,97 @@ export default function Home() {
     dispatch(setAppliedFilter(updatedAppliedFilter))
   }
 
+  function loadArticles() {
+    fetch(`${process.env.NEXT_PUBLIC_BULLETINHUB_API}/api/article`, {
+      method: 'get',
+      headers: {
+        Accept: 'application/json'
+      }
+    })
+      .then((res) => res.json())
+      .then(({ data }) => {
+        setArticles(data)
+      })
+      .catch((error) => console.error(error))
+  }
+
+  function configureCategories () {
+    let newCategories = [...categories];
+    // set to track categories
+    const categorySet = new Set(newCategories);
+
+    for (let article of articles) {
+      article.categories.forEach(categoryObj => {
+        if (!categorySet.has(categoryObj.name)) {
+          categorySet.add(categoryObj.name);
+          newCategories.push({ value: categoryObj.name, label: categoryObj.name });
+        }
+      });
+    }
+    setCategories(newCategories);
+  }
+
+  function configureSources () {
+    let newSources = [...sources];
+    // set to track sources
+    const sourceSet = new Set(newSources);
+
+    for (let article of articles) {
+      if (!sourceSet.has(article.source) && article.source) {
+        sourceSet.add(article.source);
+        newSources.push({ value: article.source, label: article.source });
+      }
+    }
+    setSources(newSources);
+  }
+
+  function configureAuthors () {
+    let newAuthors = [...authors];
+    // set to track authors
+    const authorSet = new Set(newAuthors);
+
+    for (let article of articles) {
+      if (!authorSet.has(article.author) && article.author) {
+        authorSet.add(article.author);
+        newAuthors.push({ value: article.author, label: article.author });
+      }
+    }
+    setAuthors(newAuthors);
+  }
+
   useEffect(() => {
     setHaveFilters(!isEqual(appliedFilter, emptyFilter))
     formatExhibitionFilters()
   }, [appliedFilter])
 
+  useEffect(() => {
+    loadArticles()
+  }, [])
+
+  useEffect(() => {
+    configureCategories()
+    configureSources()
+    configureAuthors()
+  }, [articles])
+
+  useEffect(() => {
+    if (haveFilters) {
+      // filter
+      let filterValues = Object.values(appliedFilter);
+
+      const result = articles.filter(article => {
+        const articleValues = Object.values({ ...article, ...article.categories.name });
+        return filterValues.some(val => articleValues.includes(val));
+      });
+
+      setFilteredArticles(result);
+    }
+  }, [haveFilters, appliedFilter])
+
   return (
     <>
       <Drawer position="left">
-        <FilterForm />
+        <FilterForm categories={categories} sources={sources} authors={authors} />
       </Drawer>
       <main className="flex justify-center z-0 absolute w-full h-[calc(100vh-4rem)] overflow-y-auto">
         <section aria-description="News feed" className="flex flex-wrap w-full pt-3 justify-center md:max-w-2xl lg:max-w-3xl xl:max-w-5xl 2xl:max-w-7xl">
@@ -72,14 +171,12 @@ export default function Home() {
               )}
             </div>
           }
-          <Article/>
-          <Article/>
-          <Article/>
-          <Article/>
-          <Article/>
-          <Article/>
-          <Article/>
-          <Article/>
+          {haveFilters && filteredArticles.map((article, i) =>
+            <Article key={i} data={article} />
+          )}
+          {!haveFilters && articles.map((article, i) => 
+            <Article key={i} data={article} />
+          )}
         </section>
       </main>
     </>

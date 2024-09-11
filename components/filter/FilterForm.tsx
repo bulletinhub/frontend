@@ -19,24 +19,46 @@ import { useAppSelector, useAppDispatch, useAppStore } from '@/app/hooks'
 import { setSavedFilter, setAppliedFilter, updateCurrentFilter, resetCurrentFilter } from '@/components/filter/filtersSlice'
 import { closeLeftDrawer } from "@/components/drawer/drawersSlice";
 
-export default function FilterForm() {
+export default function FilterForm({ categories, sources, authors }) {
   const dispatch = useAppDispatch()
   const emptyFilter = useAppSelector((state) => state.filters.emptyFilter)
   const savedFilters = useAppSelector((state) => state.filters.savedFilters)
+  // const appliedFilter = useAppSelector((state) => state.filters.appliedFilter)
 
   const [currentFilter, setCurrentFilter] = useState(emptyFilter)
   const [isFilterEmpty, setIsFilterEmpty] = useState(true)
   const [isFilterEqualFilterSaved, setIsFilterEqualFilterSaved] = useState(false)
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false)
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     const form = e.currentTarget;
     const formData = new FormData(form);
 
-    // fetch('/some-api', { method: form.method, body: formData });
+    // const { date } = Object.fromEntries(formData.entries());
+    // let today = new Date().toISOString().slice(0, 10)
 
+    // if (date && date !== today) {
+      // fetch(`${process.env.NEXT_PUBLIC_BULLETINHUB_API}/api/article/by-date/${date}`, {
+      //   method: 'get',
+      //   headers: {
+      //     Accept: 'application/json'
+      //   }
+      // })
+      //   .then((res) => res.json())
+      //   .then(({ data }) => {
+      //     const newAppliedFilter = { ...appliedFilter }
+      //     dispatch(setAppliedFilter(newAppliedFilter))
+      //   })
+      //   .catch((error) => console.error(error))
+    // }
+    
+    dispatch(closeLeftDrawer())
+    settingUpAppliedFilter(formData)
+  }
+
+  function settingUpAppliedFilter(formData: FormData) {
     const { keyword, date, source, author, category } = Object.fromEntries(formData.entries());
     
     const appliedFilter = {
@@ -48,7 +70,6 @@ export default function FilterForm() {
     }
 
     dispatch(setAppliedFilter(appliedFilter))
-    dispatch(closeLeftDrawer())
   }
 
   async function handleSaveFilter() {
@@ -109,7 +130,8 @@ export default function FilterForm() {
       for (let filter of data) {
         const filterName = filter.name
         delete filter.name
-        dispatch(setSavedFilter({ filterName, filter }))
+        delete filter.id_users
+        dispatch(setSavedFilter({ filterId: filter.id, filterName, filter }))
       }
     } else {
       console.error(message)
@@ -149,9 +171,9 @@ export default function FilterForm() {
         </div>
         <div className="flex flex-wrap items-start h-96 w-full rounded-md overflow-y-auto border border-black/50">
           {isUserLoggedIn ?
-            savedFilters.map(({ filterName, filter }, i) => 
+            savedFilters.map(({ filterName, filter, filterId }) => 
               <div 
-                key={i}
+                key={filterId}
                 className="flex items-center justify-between h-9 w-full rounded-md mb-1 hover:cursor-pointer shadow border border-black"
                 onClick={() => setCurrentFilter(filter)}
               >
@@ -206,9 +228,7 @@ export default function FilterForm() {
           value={currentFilter.category}
           options={[
             { value: "all", label: 'All' },
-            { value: "valor1", label: 'Valor 1' },
-            { value: "valor2", label: 'Valor 2' },
-            { value: "valor3", label: 'Valor 3' },
+            ...categories
           ]}
         />
         <Select
@@ -221,9 +241,7 @@ export default function FilterForm() {
           value={currentFilter.source}
           options={[
             { value: "all", label: 'All' },
-            { value: "valor1", label: 'Valor 1' },
-            { value: "valor2", label: 'Valor 2' },
-            { value: "valor3", label: 'Valor 3' },
+            ...sources
           ]}
         />
         <Select
@@ -236,9 +254,7 @@ export default function FilterForm() {
           value={currentFilter.author}
           options={[
             { value: "all", label: 'All' },
-            { value: "valor1", label: 'Valor 1' },
-            { value: "valor2", label: 'Valor 2' },
-            { value: "valor3", label: 'Valor 3' },
+            ...authors
           ]}
         />
         <div className="flex justify-center items-center h-16 w-full">

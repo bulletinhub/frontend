@@ -26,6 +26,8 @@ export default function MyAccount() {
 
   const [userData, setUserData] = useState(null)
   const [isUserLoading, setUserLoading] = useState(true)
+  const [filterData, setFilterData] = useState([])
+  const [isFilterLoading, setFilterLoading] = useState(true)
 
   function handleSignOut() {
     eraseCookie('access_token')
@@ -49,10 +51,7 @@ export default function MyAccount() {
     }
   }
 
-  useEffect(() => {
-    const accessToken = getCookie('access_token')
-    const userId = getCookie('user_id')
-
+  function loadUserData(accessToken: string | null, userId: string | null) {
     fetch(`${process.env.NEXT_PUBLIC_BULLETINHUB_API}/api/user/${userId}`, {
       method: 'get',
       headers: {
@@ -66,6 +65,33 @@ export default function MyAccount() {
         setUserLoading(false)
       })
       .catch((error) => console.error(error))
+  }
+
+  function loadUserFilters(accessToken: string | null, id_users: string | null) {
+    fetch(`${process.env.NEXT_PUBLIC_BULLETINHUB_API}/api/filter/user/${id_users}`, {
+      method: 'get',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/json'
+      }
+    })
+      .then((res) => res.json())
+      .then(({ data }) => {
+        setFilterData(data)
+        setFilterLoading(false)
+      })
+      .catch((error) => console.error(error))
+  }
+
+  useEffect(() => {
+    const accessToken = getCookie('access_token')
+    const userId = getCookie('user_id')
+    const signedIn = !!userId
+
+    if (signedIn) {
+      loadUserData(accessToken, userId)
+      loadUserFilters(accessToken, userId)
+    }
   }, [])
 
   return (
@@ -108,19 +134,30 @@ export default function MyAccount() {
               <button 
                 type="button"
                 aria-label="Edit your filters"
-                className="btn-outline mr-4"
+                className={`btn-outline mr-4 ${!filterData.length && 'hidden'}`}
                 onClick={() => openModal("editFilter")}
               >
                 <span className={`${poppinsFontSemibold.className} text-lg`}>Edit</span>
               </button>
             </div>
-            {/* <div className="flex flex-col w-full text-sm md:text-base">
-              <span className={`${poppinsFont.className} pl-4 py-4`}>There are no custom filters linked to your account.</span>
-            </div> */}
-            <div className="flex items-center h-12 w-full text-sm md:text-base">
-              <FontAwesomeIcon icon={faBookmark} className="pl-4 pr-1.5" />
-              <span className={`${poppinsFont.className} text-base`}>My Saved Filter 1</span>
-            </div>
+            
+            {!isFilterLoading ?
+              (filterData.length > 0) ?
+                filterData.map((filter, i) =>
+                  <div key={filter.id} className="flex items-center h-12 w-full text-sm md:text-base">
+                    <FontAwesomeIcon icon={faBookmark} className="pl-4 pr-1.5" />
+                    <span className={`${poppinsFont.className} text-base`}>{filter.name}</span>
+                  </div>
+                )
+              :
+                <div className="flex flex-col w-full text-sm md:text-base">
+                  <span className={`${poppinsFont.className} pl-4 py-4`}>There are no custom filters linked to your account.</span>
+                </div>
+            :
+              <div className="flex flex-col w-full text-sm md:text-base">
+                <span className={`${poppinsFont.className} pl-4 py-4`}>Loading custom filters...</span>
+              </div>
+            }
           </div>
           <button aria-label="Sign Out" className="btn-red my-8" onClick={() => handleSignOut()}>
             <span className={`${poppinsFontSemibold.className} text-lg`}>Sign Out</span>
@@ -129,7 +166,7 @@ export default function MyAccount() {
         </div>
       </section>
       <EditUserModal userData={userData} ref={editUserModalRef} />
-      <EditFilterModal ref={editFilterModalRef} />
+      <EditFilterModal filterData={filterData} ref={editFilterModalRef} />
       <DeleteAccountModal ref={deleteAccountModalRef} />
     </main>
   );

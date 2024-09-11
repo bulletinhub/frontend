@@ -7,6 +7,7 @@ declare type BaseFilter = {
 }
 
 declare type SavedFilter = {
+  filterId: number | string;
   filterName: string;
   filter: BaseFilter;
 }
