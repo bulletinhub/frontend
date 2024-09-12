@@ -2,6 +2,11 @@
 
 A nextjs front end project to be your news hub. 
 
+## WORK IN PROGRESS:
+- [ ] Fix some bugs with the filter
+- [ ] Fix date filter
+
+
 ## Requirements
 
 - **Docker (docker-compose)**
