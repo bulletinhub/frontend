@@ -1,6 +1,6 @@
 # Bulletin Hub 
 
-A nextjs front end project to be your news hub. 
+A nextjs front end project to be your news hub. The app design choices were solely based on my creativity (feel free to make suggestions!)
 
 ## WORK IN PROGRESS:
 - [ ] Fix some bugs with the filter
@@ -9,6 +9,7 @@ A nextjs front end project to be your news hub.
 
 ## Requirements
 
+- **Bulletin Hub backend running**
 - **Docker (docker-compose)**
 - **Node (npm)**
 
