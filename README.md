@@ -8,7 +8,7 @@ A nextjs front end project to be your news hub. The app design choices were sole
 - [ ] Infer remaining typescript types
 - [ ] Keep the header logo consistently centered
 - [ ] Fix article duplicating when filtering by date repeatedly
-
+- [ ] Fix screen update when filtering by date once
 
 ## Requirements
 
