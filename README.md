@@ -3,8 +3,9 @@
 A nextjs front end project to be your news hub. The app design choices were solely based on my creativity (feel free to make suggestions!)
 
 ## WORK IN PROGRESS:
-- [ ] Fix some bugs with the filter
-- [ ] Fix date filter
+- [x] Fix some bugs with the filter
+- [x] Fix date filter
+- [ ] Infer remaining typescript types
 
 
 ## Requirements
