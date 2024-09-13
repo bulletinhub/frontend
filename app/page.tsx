@@ -120,7 +120,54 @@ export default function Home() {
     setAuthors(newAuthors);
   }
 
+  async function addOlderArticles() {
+    await fetch(`${process.env.NEXT_PUBLIC_BULLETINHUB_API}/api/article/by-date/${appliedFilter.date}`, {
+      method: 'get',
+      headers: {
+        Accept: 'application/json'
+      }
+    })
+      .then((res) => res.json())
+      .then(({ data }) => {
+        const newArticles = [ ...articles, ...data ]
+        dispatch(setArticles(newArticles))
+      })
+      .catch((error) => console.error(error))
+  }
+
+  function filterArticles() {
+    // transform filter data to array of words
+    let filterValues = Object.values(appliedFilter);
+    filterValues = filterValues
+      .filter(value => value && value != 'all')
+      .map(str => str.toLowerCase().split(/[\s\-\.\!\:\,\/\&\?\+\=\@]+/))
+      .flat()
+
+    // regex pattern to match URLs
+    const urlPattern = /^https?:\/\/[^\s/$.?#].[^\s]*$/i
+
+    const result = articles.filter(article => {
+      const articleCategoriesValues = article.categories.map(categ => categ.name)
+
+      // transform article data to array of words
+      const articleValues = Object.values({ ...article, ...articleCategoriesValues })
+      const cleanArticle = articleValues.filter(value => typeof value === 'string')
+      const articleWords = cleanArticle
+        .map((str) => urlPattern.test(str) ? [str] : str.toLowerCase().split(/[\s\-\.\!\:\,\/\&\?\+\=\@]+/))
+        .flat()
+
+      // check if every filter word are inside the article words
+      return filterValues.every(val => articleWords.includes(val))
+    });
+
+    setFilteredArticles(result);
+  }
+
   useEffect(() => {
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' }).slice(0, 10)
+    if (appliedFilter.date && appliedFilter.date != today) {
+      addOlderArticles()
+    }
     setHaveFilters(!isEqual(appliedFilter, emptyFilter))
     formatExhibitionFilters()
   }, [appliedFilter])
@@ -137,15 +184,7 @@ export default function Home() {
 
   useEffect(() => {
     if (haveFilters) {
-      // filter
-      let filterValues = Object.values(appliedFilter);
-
-      const result = articles.filter(article => {
-        const articleValues = Object.values({ ...article, ...article.categories.name });
-        return filterValues.some(val => articleValues.includes(val));
-      });
-
-      setFilteredArticles(result);
+      filterArticles()
     }
   }, [haveFilters, appliedFilter])
 
@@ -177,6 +216,9 @@ export default function Home() {
           {!haveFilters && articles.map((article, i) => 
             <Article key={i} data={article} />
           )}
+          {(haveFilters && !filteredArticles.length) &&
+            <span className={`${poppinsFont.className} py-64`}>No article(s) found with the applied filter(s). Try a different filter!</span>
+          }
         </section>
       </main>
     </>

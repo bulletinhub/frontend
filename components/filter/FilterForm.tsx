@@ -35,24 +35,6 @@ export default function FilterForm({ categories, sources, authors }) {
 
     const form = e.currentTarget;
     const formData = new FormData(form);
-
-    // const { date } = Object.fromEntries(formData.entries());
-    // let today = new Date().toISOString().slice(0, 10)
-
-    // if (date && date !== today) {
-      // fetch(`${process.env.NEXT_PUBLIC_BULLETINHUB_API}/api/article/by-date/${date}`, {
-      //   method: 'get',
-      //   headers: {
-      //     Accept: 'application/json'
-      //   }
-      // })
-      //   .then((res) => res.json())
-      //   .then(({ data }) => {
-      //     const newAppliedFilter = { ...appliedFilter }
-      //     dispatch(setAppliedFilter(newAppliedFilter))
-      //   })
-      //   .catch((error) => console.error(error))
-    // }
     
     dispatch(closeLeftDrawer())
     settingUpAppliedFilter(formData)
@@ -214,7 +196,7 @@ export default function FilterForm({ categories, sources, authors }) {
           label="Date:"
           labelClassName="w-full h-8 flex items-center"
           className="rounded-md border py-1 px-2 h-9"
-          max={new Date().toISOString().split("T")[0]} // max date today
+          max={new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' }).slice(0, 10)} // max date today
           onChange={handleFormChange}
           value={currentFilter.date}
         />
