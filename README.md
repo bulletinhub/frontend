@@ -1,6 +1,7 @@
 # Bulletin Hub 
 
 A nextjs front end project to be your news hub. The app design choices were solely based on my creativity (feel free to make suggestions!)
+This project (both frontend and backend) was part of a Skill Assessment test for a job.
 
 ## WORK IN PROGRESS:
 - [x] Fix some bugs with the filter
